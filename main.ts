@@ -1,85 +1,40 @@
 import { App, Editor, MarkdownView, Modal, Notice, Plugin, PluginSettingTab, Setting } from 'obsidian';
+import * as fs from 'fs';
+import { exec } from 'child_process';
 
-// Remember to rename these classes and interfaces!
-
-interface MyPluginSettings {
-	mySetting: string;
+interface RemarkablePluginSettings {
+	remarkableDir: string;
 }
 
-const DEFAULT_SETTINGS: MyPluginSettings = {
-	mySetting: 'default'
+const DEFAULT_SETTINGS: RemarkablePluginSettings = {
+	remarkableDir: `${process.env.HOME}/Documents/writing/Remarkable`
 }
 
-export default class MyPlugin extends Plugin {
-	settings: MyPluginSettings;
+export default class RemarkableSyncPlugin extends Plugin {
+	settings: RemarkablePluginSettings;
 
 	async onload() {
 		await this.loadSettings();
 
 		// This creates an icon in the left ribbon.
-		const ribbonIconEl = this.addRibbonIcon('dice', 'Sample Plugin', (evt: MouseEvent) => {
-			// Called when the user clicks the icon.
-			new Notice('This is a notice!');
+		const ribbonIconEl = this.addRibbonIcon('dice', 'Remarkable Sync Plugin', (evt: MouseEvent) => {
+			new Notice('Remarkable Sync Plugin activated!');
 		});
-		// Perform additional things with the ribbon
 		ribbonIconEl.addClass('my-plugin-ribbon-class');
 
 		// This adds a status bar item to the bottom of the app. Does not work on mobile apps.
 		const statusBarItemEl = this.addStatusBarItem();
-		statusBarItemEl.setText('Status Bar Text');
-
-		// This adds a simple command that can be triggered anywhere
-		this.addCommand({
-			id: 'open-sample-modal-simple',
-			name: 'Open sample modal (simple)',
-			callback: () => {
-				new SampleModal(this.app).open();
-			}
-		});
-		// This adds an editor command that can perform some operation on the current editor instance
-		this.addCommand({
-			id: 'sample-editor-command',
-			name: 'Sample editor command',
-			editorCallback: (editor: Editor, view: MarkdownView) => {
-				console.log(editor.getSelection());
-				editor.replaceSelection('Sample Editor Command');
-			}
-		});
-		// This adds a complex command that can check whether the current state of the app allows execution of the command
-		this.addCommand({
-			id: 'open-sample-modal-complex',
-			name: 'Open sample modal (complex)',
-			checkCallback: (checking: boolean) => {
-				// Conditions to check
-				const markdownView = this.app.workspace.getActiveViewOfType(MarkdownView);
-				if (markdownView) {
-					// If checking is true, we're simply "checking" if the command can be run.
-					// If checking is false, then we want to actually perform the operation.
-					if (!checking) {
-						new SampleModal(this.app).open();
-					}
-
-					// This command will only show up in Command Palette when the check function returns true
-					return true;
-				}
-			}
-		});
+		statusBarItemEl.setText('Remarkable Sync Plugin');
 
 		// This adds a settings tab so the user can configure various aspects of the plugin
-		this.addSettingTab(new SampleSettingTab(this.app, this));
+		this.addSettingTab(new RemarkableSettingTab(this.app, this));
 
-		// If the plugin hooks up any global DOM events (on parts of the app that doesn't belong to this plugin)
-		// Using this function will automatically remove the event listener when this plugin is disabled.
-		this.registerDomEvent(document, 'click', (evt: MouseEvent) => {
-			console.log('click', evt);
-		});
-
-		// When registering intervals, this function will automatically clear the interval when the plugin is disabled.
-		this.registerInterval(window.setInterval(() => console.log('setInterval'), 5 * 60 * 1000));
+		// Start watching the directory
+		this.startWatching();
 	}
 
 	onunload() {
-
+		// Add any cleanup logic here
 	}
 
 	async loadSettings() {
@@ -89,28 +44,61 @@ export default class MyPlugin extends Plugin {
 	async saveSettings() {
 		await this.saveData(this.settings);
 	}
+
+	startWatching() {
+		const remarkableDir = this.settings.remarkableDir;
+
+		fs.watch(remarkableDir, (eventType, filename) => {
+			if (filename && eventType === 'change') {
+				const filePath = `${remarkableDir}/${filename}`;
+				this.handleFileChange(filePath);
+			}
+		});
+
+		new Notice(`Watching directory: ${remarkableDir}`);
+	}
+
+	handleFileChange(filePath: string) {
+		if (fs.existsSync(filePath)) {
+			const ext = filePath.split('.').pop();
+			if (ext === 'md') {
+				this.convertMarkdownToPDF(filePath);
+			} else if (ext === 'pdf') {
+				this.uploadPDF(filePath);
+			}
+		} else {
+			new Notice(`File ${filePath} does not exist, skipping.`);
+		}
+	}
+
+	convertMarkdownToPDF(filePath: string) {
+		const pdfFile = filePath.replace('.md', '.pdf');
+		exec(`pandoc "${filePath}" -o "${pdfFile}"`, (error, stdout, stderr) => {
+			if (error) {
+				new Notice(`Failed to convert ${filePath} to PDF: ${stderr}`);
+				return;
+			}
+			new Notice(`Converted ${filePath} to ${pdfFile}`);
+			this.uploadPDF(pdfFile);
+		});
+	}
+
+	uploadPDF(pdfFile: string) {
+		exec(`rmapi put "${pdfFile}"`, (error, stdout, stderr) => {
+			if (error) {
+				new Notice(`Failed to upload ${pdfFile} to Remarkable: ${stderr}`);
+				return;
+			}
+			new Notice(`Successfully uploaded ${pdfFile} to Remarkable`);
+			fs.unlinkSync(pdfFile);
+		});
+	}
 }
 
-class SampleModal extends Modal {
-	constructor(app: App) {
-		super(app);
-	}
+class RemarkableSettingTab extends PluginSettingTab {
+	plugin: RemarkableSyncPlugin;
 
-	onOpen() {
-		const {contentEl} = this;
-		contentEl.setText('Woah!');
-	}
-
-	onClose() {
-		const {contentEl} = this;
-		contentEl.empty();
-	}
-}
-
-class SampleSettingTab extends PluginSettingTab {
-	plugin: MyPlugin;
-
-	constructor(app: App, plugin: MyPlugin) {
+	constructor(app: App, plugin: RemarkableSyncPlugin) {
 		super(app, plugin);
 		this.plugin = plugin;
 	}
@@ -120,14 +108,16 @@ class SampleSettingTab extends PluginSettingTab {
 
 		containerEl.empty();
 
+		containerEl.createEl('h2', {text: 'Remarkable Sync Plugin Settings'});
+
 		new Setting(containerEl)
-			.setName('Setting #1')
-			.setDesc('It\'s a secret')
+			.setName('Remarkable Directory')
+			.setDesc('The directory to watch for Markdown and PDF files to upload to Remarkable')
 			.addText(text => text
-				.setPlaceholder('Enter your secret')
-				.setValue(this.plugin.settings.mySetting)
+				.setPlaceholder('Enter directory path')
+				.setValue(this.plugin.settings.remarkableDir)
 				.onChange(async (value) => {
-					this.plugin.settings.mySetting = value;
+					this.plugin.settings.remarkableDir = value;
 					await this.plugin.saveSettings();
 				}));
 	}
