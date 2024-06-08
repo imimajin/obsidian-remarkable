@@ -34,15 +34,3 @@ jobs:
         body: |
           Changes in this release:
           ${{ github.event.head_commit.message }}
-        draft: false
-        prerelease: false
-
-    - name: Upload release asset
-      uses: actions/upload-release-asset@v1
-      env:
-        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-      with:
-        upload_url: ${{ steps.create_release.outputs.upload_url }}
-        asset_path: ./dist/main.js
-        asset_name: main.js
-        asset_content_type: application/javascript
