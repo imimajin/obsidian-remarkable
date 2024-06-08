@@ -2,6 +2,7 @@
 # Obsidian to Remarkable
 
 This plugin automates the process of converting Markdown files to PDF and uploading them to a Remarkable tablet.
+This plugin uses [rmapi](https://github.com/juruen/rmapi) to interact with the Remarkable cloud. 
 
 ## Installation
 
