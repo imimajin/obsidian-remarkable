@@ -1,6 +1,6 @@
 {
-    "id": "remarkable-sync",
-    "name": "Remarkable Sync",
+    "id": "2remarkable",
+    "name": "To Remarkable",
     "version": "1.0.0",
     "minAppVersion": "0.12.0",
     "description": "Automatically converts Markdown files to PDF and uploads them to a Remarkable tablet.",

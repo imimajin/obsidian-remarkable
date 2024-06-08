@@ -17,14 +17,14 @@ export default class ObsidianToRemarkablePlugin extends Plugin {
 		await this.loadSettings();
 
 		// This creates an icon in the left ribbon.
-		const ribbonIconEl = this.addRibbonIcon('dice', 'Obsidian to Remarkable', (evt: MouseEvent) => {
-			new Notice('Obsidian to Remarkable plugin activated!');
+		const ribbonIconEl = this.addRibbonIcon('dice', 'To Remarkable', (evt: MouseEvent) => {
+			new Notice('To Remarkable plugin activated!');
 		});
 		ribbonIconEl.addClass('my-plugin-ribbon-class');
 
 		// This adds a status bar item to the bottom of the app. Does not work on mobile apps.
 		const statusBarItemEl = this.addStatusBarItem();
-		statusBarItemEl.setText('Obsidian to Remarkable');
+		statusBarItemEl.setText('To Remarkable');
 
 		// This adds a settings tab so the user can configure various aspects of the plugin
 		this.addSettingTab(new RemarkableSettingTab(this.app, this));
