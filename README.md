@@ -1,46 +1,39 @@
 
-# Obsidian to Remarkable
+# To Remarkable
 
-This plugin automates the process of converting Markdown files to PDF and uploading them to a Remarkable tablet.
-This plugin uses [rmapi](https://github.com/juruen/rmapi) to interact with the Remarkable cloud. 
+This plugin automates the process of converting Markdown files to PDF and uploading them to a Remarkable tablet. This plugin uses [rmapi](https://github.com/juruen/rmapi) to interact with the Remarkable cloud.
+
+## Requirements
+
+- `pandoc`: for converting Markdown to PDF.
+- `rmapi`: for uploading files to Remarkable.
+- `inotify-tools`: for watching directory changes.
 
 ## Installation
 
 1. **Install Dependencies**:
-   - Ensure you have `pandoc` and `rmapi` installed on your system.
+   ```sh
+   sudo apt-get update
+   sudo apt-get install pandoc inotify-tools
+   ```
 
-   ### macOS
-   - Install them using Homebrew:
-     ```sh
-     brew install pandoc
-     brew install rmapi
-     ```
-
-   ### Linux
-   - Install them using your package manager. For example, on Debian-based systems (like Ubuntu):
-     ```sh
-     sudo apt-get update
-     sudo apt-get install pandoc
-     ```
-   - For `rmapi`, follow the instructions on the [rmapi GitHub page](https://github.com/juruen/rmapi) to install:
-     ```sh
-     sudo apt-get install golang-go
-     go get github.com/juruen/rmapi
-     ```
+2. **Install `rmapi`**:
+   Follow the instructions on the [rmapi GitHub page](https://github.com/juruen/rmapi) to install and configure `rmapi`.You need to run `rmapi` once to create the device and user token. Refer to the [rmapi tutorial](https://github.com/juruen/rmapi/blob/master/docs/tutorial-print-macosx.md#run-rmapi-for-first-time) for more details.
 
 2. **Install the Plugin**:
-   - Copy the plugin files to your Obsidian plugins directory (`.obsidian/plugins/obsidian-to-remarkable`).
+   - You can install the plugin from the Obsidian community plugins section by searching for "2Remarkable".
+   - Alternatively, copy the plugin files to your Obsidian plugins directory (`.obsidian/plugins/obsidian-remarkable`).
 
    ```sh
-   mkdir -p ~/.obsidian/plugins/obsidian-to-remarkable
-   cp -r path/to/your/plugin/files/* ~/.obsidian/plugins/obsidian-to-remarkable/
+   mkdir -p ~/.obsidian/plugins/obsidian-remarkable
+   cp -r path/to/your/plugin/files/* ~/.obsidian/plugins/obsidian-remarkable
    ```
 
 3. **Enable the Plugin**:
    - Open Obsidian.
    - Go to `Settings` > `Community plugins`.
    - Disable `Safe mode`.
-   - Enable the `Obsidian to Remarkable` plugin.
+   - Enable the `To Remarkable` plugin.
 
 ## Usage
 
@@ -48,7 +41,7 @@ This plugin uses [rmapi](https://github.com/juruen/rmapi) to interact with the R
    - The default directory for watching is set to `~/Documents/Remarkable`.
    - You can change this directory in the plugin settings within Obsidian:
      - Open Obsidian.
-     - Go to `Settings` > `Obsidian to Remarkable Plugin`.
+     - Go to `Settings` > `2Remarkable`.
      - Set the "Remarkable Directory" to the directory you want to watch.
 
 2. **Copy Files to the Watched Directory**:
