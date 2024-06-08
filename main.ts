@@ -1,4 +1,4 @@
-import { App, Editor, MarkdownView, Modal, Notice, Plugin, PluginSettingTab, Setting } from 'obsidian';
+import { App, Editor, MarkdownView, Modal, Notice, Plugin, PluginSettingTab, Setting, normalizePath } from 'obsidian';
 import * as fs from 'fs';
 import { exec } from 'child_process';
 
@@ -7,24 +7,24 @@ interface RemarkablePluginSettings {
 }
 
 const DEFAULT_SETTINGS: RemarkablePluginSettings = {
-	remarkableDir: `${process.env.HOME}/Documents/writing/Remarkable`
+	remarkableDir: `${process.env.HOME}/Documents/Remarkable`
 }
 
-export default class RemarkableSyncPlugin extends Plugin {
+export default class ObsidianToRemarkablePlugin extends Plugin {
 	settings: RemarkablePluginSettings;
 
 	async onload() {
 		await this.loadSettings();
 
 		// This creates an icon in the left ribbon.
-		const ribbonIconEl = this.addRibbonIcon('dice', 'Remarkable Sync Plugin', (evt: MouseEvent) => {
-			new Notice('Remarkable Sync Plugin activated!');
+		const ribbonIconEl = this.addRibbonIcon('dice', 'Obsidian to Remarkable', (evt: MouseEvent) => {
+			new Notice('Obsidian to Remarkable plugin activated!');
 		});
 		ribbonIconEl.addClass('my-plugin-ribbon-class');
 
 		// This adds a status bar item to the bottom of the app. Does not work on mobile apps.
 		const statusBarItemEl = this.addStatusBarItem();
-		statusBarItemEl.setText('Remarkable Sync Plugin');
+		statusBarItemEl.setText('Obsidian to Remarkable');
 
 		// This adds a settings tab so the user can configure various aspects of the plugin
 		this.addSettingTab(new RemarkableSettingTab(this.app, this));
@@ -96,19 +96,17 @@ export default class RemarkableSyncPlugin extends Plugin {
 }
 
 class RemarkableSettingTab extends PluginSettingTab {
-	plugin: RemarkableSyncPlugin;
+	plugin: ObsidianToRemarkablePlugin;
 
-	constructor(app: App, plugin: RemarkableSyncPlugin) {
+	constructor(app: App, plugin: ObsidianToRemarkablePlugin) {
 		super(app, plugin);
 		this.plugin = plugin;
 	}
 
 	display(): void {
-		const {containerEl} = this;
+		const { containerEl } = this;
 
 		containerEl.empty();
-
-		containerEl.createEl('h2', {text: 'Remarkable Sync Plugin Settings'});
 
 		new Setting(containerEl)
 			.setName('Remarkable Directory')
@@ -117,7 +115,7 @@ class RemarkableSettingTab extends PluginSettingTab {
 				.setPlaceholder('Enter directory path')
 				.setValue(this.plugin.settings.remarkableDir)
 				.onChange(async (value) => {
-					this.plugin.settings.remarkableDir = value;
+					this.plugin.settings.remarkableDir = normalizePath(value);
 					await this.plugin.saveSettings();
 				}));
 	}
