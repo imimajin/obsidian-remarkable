@@ -21,7 +21,7 @@ This plugin automates the process of converting Markdown files to PDF and upload
    Follow the instructions on the [rmapi GitHub page](https://github.com/juruen/rmapi) to install and configure `rmapi`.You need to run `rmapi` once to create the device and user token. Refer to the [rmapi tutorial](https://github.com/juruen/rmapi/blob/master/docs/tutorial-print-macosx.md#run-rmapi-for-first-time) for more details.
 
 2. **Install the Plugin**:
-   - You can install the plugin from the Obsidian community plugins section by searching for "2Remarkable".
+   - You can install the plugin from the Obsidian community plugins section by searching for "To Remarkable".
    - Alternatively, copy the plugin files to your Obsidian plugins directory (`.obsidian/plugins/obsidian-remarkable`).
 
    ```sh
@@ -41,7 +41,7 @@ This plugin automates the process of converting Markdown files to PDF and upload
    - The default directory for watching is set to `~/Documents/Remarkable`.
    - You can change this directory in the plugin settings within Obsidian:
      - Open Obsidian.
-     - Go to `Settings` > `2Remarkable`.
+     - Go to `Settings` > `To Remarkable`.
      - Set the "Remarkable Directory" to the directory you want to watch.
 
 2. **Copy Files to the Watched Directory**:
